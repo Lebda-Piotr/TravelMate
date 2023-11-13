@@ -2,6 +2,7 @@ package com.example.travelmate;
 
 import android.os.Bundle;
 import android.app.Activity;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.Manifest;
@@ -9,6 +10,9 @@ import android.widget.ImageButton;
 import org.osmdroid.util.GeoPoint;
 import android.widget.LinearLayout;
 import org.osmdroid.api.IMapController;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.core.content.ContextCompat;
 import org.osmdroid.views.MapView;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
@@ -23,6 +27,10 @@ import androidx.core.app.ActivityCompat;
 import android.content.Context;
 import android.preference.PreferenceManager;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+
+import com.google.android.material.navigation.NavigationView;
 
 public class MainActivity extends AppCompatActivity {
     private MapView mapView = null;
@@ -34,6 +42,14 @@ public class MainActivity extends AppCompatActivity {
     private final int REQUEST_PERMISSIONS_REQUEST_CODE = 1;
 
 
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if(drawerToggle.nOptionsItemSelected(item))
+        {
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,12 +130,67 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        @Override
+
+
         menuButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                DrawerLayout drawerLayout;
+                NavigationView navigationView;
+                ActionBarDrawerToggle drawerToggle;
+
+                drawerLayout = findViewById(R.id.drawer_layout);
+                navigationView = findViewById(R.id.nav_view);
+                drawerToggle = new ActionBarDrawerToggle(this,drawerLayout,R.string.open,R.string.close);
+                drawerLayout.addDrawerListener(drawerToggle);
+                drawerToggle.syncState();
+                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+                    @Override
+                    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                        switch (item.getItemId())
+                        {
+                            case R.id.home:
+                            {
+                                Toast.makeText(MainActivity.this, "Strona główna", Toast.LENGTH_SHORT).show();
+                            }
+                            case R.id.compass:
+                            {
+                                Toast.makeText(MainActivity.this, "Kompas", Toast.LENGTH_SHORT).show();
+                            }
+                            case R.id.map:
+                            {
+                                Toast.makeText(MainActivity.this, "Mapa", Toast.LENGTH_SHORT).show();
+                            }
+                            case R.id.rate:
+                            {
+                                Toast.makeText(MainActivity.this, "Oceń nas", Toast.LENGTH_SHORT).show();
+                            }
+                            case R.id.action_settings:
+                            {
+                                Toast.makeText(MainActivity.this, "Ustawienia", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                        return false;
+                    }
+                });
+                @Override
+                public void onBackPressed() {
+                    if(drawerLayout.isDrawerOpen(GravityCompat.START))
+                    {
+                        drawerLayout.closeDrawer(GravityCompat.START);
+                    }
+                    else {
+                        super.onBackPressed();
+                }
                 // Tutaj możesz dodać kod do rozwijania menu i obsługi dodatkowych opcji.
             }
         });
+
+
+
+
     }
 
     @Override
