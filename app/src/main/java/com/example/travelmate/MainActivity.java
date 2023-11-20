@@ -153,36 +153,28 @@ public class MainActivity extends AppCompatActivity {
 
                 drawerLayout = findViewById(R.id.drawer_layout);
                 navigationView = findViewById(R.id.nav_view);
-
-                if (drawerLayout != null && navigationView != null) {
-                    drawerToggle = new ActionBarDrawerToggle(MainActivity.this, drawerLayout, R.string.open, R.string.close);
-                    drawerLayout.addDrawerListener(drawerToggle);
-                    drawerToggle.syncState();
-
-                    // Warto sprawdzić, czy ActionBar nie jest null przed użyciem
-                    if (getSupportActionBar() != null) {
-                        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-                    }
-
-                    navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-                        @Override
-                        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                            int itemId = item.getItemId();
-                            if (itemId == R.id.home) {
-                                Toast.makeText(MainActivity.this, "Strona główna", Toast.LENGTH_SHORT).show();
-                            } else if (itemId == R.id.compass) {
-                                Toast.makeText(MainActivity.this, "Kompas", Toast.LENGTH_SHORT).show();
-                            } else if (itemId == R.id.map) {
-                                Toast.makeText(MainActivity.this, "Mapa", Toast.LENGTH_SHORT).show();
-                            } else if (itemId == R.id.rate) {
-                                Toast.makeText(MainActivity.this, "Oceń nas", Toast.LENGTH_SHORT).show();
-                            } else if (itemId == R.id.action_settings) {
-                                Toast.makeText(MainActivity.this, "Ustawienia", Toast.LENGTH_SHORT).show();
-                            }
-                            return false;
+                drawerToggle = new ActionBarDrawerToggle(MainActivity.this, drawerLayout, R.string.open, R.string.close);
+                drawerLayout.addDrawerListener(drawerToggle);
+                drawerToggle.syncState();
+                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+                    @Override
+                    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                        int itemId = item.getItemId();
+                        if (itemId == R.id.home) {
+                            Toast.makeText(MainActivity.this, "Strona główna", Toast.LENGTH_SHORT).show();
+                        } else if (itemId == R.id.compass) {
+                            Toast.makeText(MainActivity.this, "Kompas", Toast.LENGTH_SHORT).show();
+                        } else if (itemId == R.id.map) {
+                            Toast.makeText(MainActivity.this, "Mapa", Toast.LENGTH_SHORT).show();
+                        } else if (itemId == R.id.rate) {
+                            Toast.makeText(MainActivity.this, "Oceń nas", Toast.LENGTH_SHORT).show();
+                        } else if (itemId == R.id.action_settings) {
+                            Toast.makeText(MainActivity.this, "Ustawienia", Toast.LENGTH_SHORT).show();
                         }
-                    });
-                }
+                        return false;
+                    }
+                });
             }
         });
     }
