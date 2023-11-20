@@ -1,5 +1,7 @@
 package com.example.travelmate;
 
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.app.Activity;
 import android.view.MenuItem;
@@ -8,6 +10,8 @@ import android.widget.Button;
 import android.Manifest;
 import android.widget.ImageButton;
 import org.osmdroid.util.GeoPoint;
+
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import org.osmdroid.api.IMapController;
 
@@ -42,6 +46,12 @@ public class MainActivity extends AppCompatActivity {
     private final int REQUEST_PERMISSIONS_REQUEST_CODE = 1;
     private ActionBarDrawerToggle drawerToggle;
     private DrawerLayout drawerLayout;
+    private ImageView imageView;
+    private float[] mGravity = new float[3];
+    private float[] mgeoMagnetic = new float[3];
+    private float azimuth = 0f;
+    private float currectAzimuth = 0f;
+    private SensorManager mSensorManager;
 
 
     @Override
@@ -138,8 +148,20 @@ public class MainActivity extends AppCompatActivity {
         compassButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                imageView = (ImageView) findViewById(R.id.compass);
+                mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+
+
+
                 // Tutaj możesz dodać kod do obsługi kompasu.
             }
+            @Override
+            protected void onResume() {
+                MainActivity.super.onResume();
+                mSensorManager.registerListener(this,mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD), SensorManager.SENSOR_MAGNETIC_FIELD)
+            }
+
         });
 
 

@@ -16,7 +16,6 @@
         android:layout_gravity="start"
         />
 
-
     <!-- Mapa OpenStreetMap (MapView) -->
     <org.osmdroid.views.MapView
         android:id="@+id/mapView"
@@ -52,7 +51,9 @@
             android:id="@+id/compassButton"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:src="@drawable/compass_icon" />
+            android:src="@drawable/compass_icon"
+            />
+
         <Button
             android:id="@+id/setDestinationButton"
             android:layout_width="wrap_content"
