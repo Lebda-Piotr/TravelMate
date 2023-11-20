@@ -52,6 +52,8 @@ public class MainActivity extends AppCompatActivity {
     private float azimuth = 0f;
     private float currectAzimuth = 0f;
     private SensorManager mSensorManager;
+    float[] mGravityValues=new float[3];
+
 
 
     @Override
@@ -156,11 +158,7 @@ public class MainActivity extends AppCompatActivity {
 
                 // Tutaj możesz dodać kod do obsługi kompasu.
             }
-            @Override
-            protected void onResume() {
-                MainActivity.super.onResume();
-                mSensorManager.registerListener(this,mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD), SensorManager.SENSOR_MAGNETIC_FIELD)
-            }
+
 
         });
 
