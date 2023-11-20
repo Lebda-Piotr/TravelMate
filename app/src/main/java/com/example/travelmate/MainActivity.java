@@ -40,15 +40,27 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton menuButton;
     private MyLocationNewOverlay myLocationOverlay;
     private final int REQUEST_PERMISSIONS_REQUEST_CODE = 1;
+    private ActionBarDrawerToggle drawerToggle;
+    private DrawerLayout drawerLayout;
 
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if(drawerToggle.nOptionsItemSelected(item))
+        if(drawerToggle.onOptionsItemSelected(item))
         {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            drawerLayout.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+        // Tutaj możesz dodać kod do rozwijania menu i obsługi dodatkowych opcji.
     }
 
     @Override
@@ -130,67 +142,49 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        @Override
 
+        drawerLayout = findViewById(R.id.drawer_layout);
 
         menuButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 DrawerLayout drawerLayout;
                 NavigationView navigationView;
-                ActionBarDrawerToggle drawerToggle;
 
                 drawerLayout = findViewById(R.id.drawer_layout);
                 navigationView = findViewById(R.id.nav_view);
-                drawerToggle = new ActionBarDrawerToggle(this,drawerLayout,R.string.open,R.string.close);
-                drawerLayout.addDrawerListener(drawerToggle);
-                drawerToggle.syncState();
-                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-                navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-                    @Override
-                    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                        switch (item.getItemId())
-                        {
-                            case R.id.home:
-                            {
+
+                if (drawerLayout != null && navigationView != null) {
+                    drawerToggle = new ActionBarDrawerToggle(MainActivity.this, drawerLayout, R.string.open, R.string.close);
+                    drawerLayout.addDrawerListener(drawerToggle);
+                    drawerToggle.syncState();
+
+                    // Warto sprawdzić, czy ActionBar nie jest null przed użyciem
+                    if (getSupportActionBar() != null) {
+                        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                    }
+
+                    navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+                        @Override
+                        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                            int itemId = item.getItemId();
+                            if (itemId == R.id.home) {
                                 Toast.makeText(MainActivity.this, "Strona główna", Toast.LENGTH_SHORT).show();
-                            }
-                            case R.id.compass:
-                            {
+                            } else if (itemId == R.id.compass) {
                                 Toast.makeText(MainActivity.this, "Kompas", Toast.LENGTH_SHORT).show();
-                            }
-                            case R.id.map:
-                            {
+                            } else if (itemId == R.id.map) {
                                 Toast.makeText(MainActivity.this, "Mapa", Toast.LENGTH_SHORT).show();
-                            }
-                            case R.id.rate:
-                            {
+                            } else if (itemId == R.id.rate) {
                                 Toast.makeText(MainActivity.this, "Oceń nas", Toast.LENGTH_SHORT).show();
-                            }
-                            case R.id.action_settings:
-                            {
+                            } else if (itemId == R.id.action_settings) {
                                 Toast.makeText(MainActivity.this, "Ustawienia", Toast.LENGTH_SHORT).show();
                             }
+                            return false;
                         }
-                        return false;
-                    }
-                });
-                @Override
-                public void onBackPressed() {
-                    if(drawerLayout.isDrawerOpen(GravityCompat.START))
-                    {
-                        drawerLayout.closeDrawer(GravityCompat.START);
-                    }
-                    else {
-                        super.onBackPressed();
+                    });
                 }
-                // Tutaj możesz dodać kod do rozwijania menu i obsługi dodatkowych opcji.
             }
         });
-
-
-
-
     }
 
     @Override
