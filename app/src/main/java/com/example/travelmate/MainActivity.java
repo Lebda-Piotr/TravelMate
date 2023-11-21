@@ -29,6 +29,13 @@ import android.preference.PreferenceManager;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+
 
 import com.google.android.material.navigation.NavigationView;
 
@@ -42,12 +49,17 @@ public class MainActivity extends AppCompatActivity {
     private final int REQUEST_PERMISSIONS_REQUEST_CODE = 1;
     private ActionBarDrawerToggle drawerToggle;
     private DrawerLayout drawerLayout;
-
+    private LinearLayout compassLayout;
+    private ImageView compassImage;
+    private TextView compassDirection;
+    private SensorManager sensorManager;
+    private Sensor accelerometer;
+    private Sensor magnetometer;
+    private boolean compassActive = false;
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if(drawerToggle.onOptionsItemSelected(item))
-        {
+        if(drawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -60,7 +72,6 @@ public class MainActivity extends AppCompatActivity {
         } else {
             super.onBackPressed();
         }
-        // Tutaj możesz dodać kod do rozwijania menu i obsługi dodatkowych opcji.
     }
 
     @Override
@@ -72,14 +83,12 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
-
         // Inicjalizacja mapy OpenStreetMap
         mapView = findViewById(R.id.mapView);
         mapView.setTileSource(TileSourceFactory.MAPNIK);
 
         mapController = mapView.getController();
-        mapController.setZoom(15);  // Ustaw zoom mapy na 15 (zmień na odpowiednią wartość).
-
+        mapController.setZoom(15);
 
         // Przyciski zoom i zoom palcami
         mapView.setBuiltInZoomControls(true);
@@ -91,6 +100,23 @@ public class MainActivity extends AppCompatActivity {
         menuButton = findViewById(R.id.menuButton);
 
         Button setDestinationButton = findViewById(R.id.setDestinationButton);
+
+        // Dodane elementy związane z kompasem
+        compassLayout = findViewById(R.id.compassLayout);
+        compassImage = findViewById(R.id.compassImage);
+        compassDirection = findViewById(R.id.compassDirection);
+
+        // Inicjalizacja sensorów do obsługi kompasu
+        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+
+
+
+
+
+
+
 
         setDestinationButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -114,19 +140,14 @@ public class MainActivity extends AppCompatActivity {
             myLocationOverlay.enableMyLocation();
             mapView.getOverlays().add(myLocationOverlay);
         }
+
         locateMeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (myLocationOverlay != null && myLocationOverlay.getMyLocation() != null) {
-                    // Pobranie aktualnej lokalizacji użytkownika
                     double latitude = myLocationOverlay.getMyLocation().getLatitude();
                     double longitude = myLocationOverlay.getMyLocation().getLongitude();
-
-                    // Utworzenie obiektu GeoPoint na podstawie lokalizacji użytkownika
                     org.osmdroid.util.GeoPoint userLocation = new org.osmdroid.util.GeoPoint(latitude, longitude);
-
-
-                    // Ustaw mapę w centrum na podstawie lokalizacji użytkownika
                     mapController.setCenter(userLocation);
                 } else {
                     Toast.makeText(MainActivity.this, "Brak dostępu do lokalizacji.", Toast.LENGTH_SHORT).show();
@@ -134,14 +155,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
         compassButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // Tutaj możesz dodać kod do obsługi kompasu.
+                toggleCompass();
+                toggleCompassLayout();
             }
         });
-
 
         drawerLayout = findViewById(R.id.drawer_layout);
 
@@ -153,30 +173,111 @@ public class MainActivity extends AppCompatActivity {
 
                 drawerLayout = findViewById(R.id.drawer_layout);
                 navigationView = findViewById(R.id.nav_view);
-                drawerToggle = new ActionBarDrawerToggle(MainActivity.this, drawerLayout, R.string.open, R.string.close);
-                drawerLayout.addDrawerListener(drawerToggle);
-                drawerToggle.syncState();
-                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-                navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-                    @Override
-                    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                        int itemId = item.getItemId();
-                        if (itemId == R.id.home) {
-                            Toast.makeText(MainActivity.this, "Strona główna", Toast.LENGTH_SHORT).show();
-                        } else if (itemId == R.id.compass) {
-                            Toast.makeText(MainActivity.this, "Kompas", Toast.LENGTH_SHORT).show();
-                        } else if (itemId == R.id.map) {
-                            Toast.makeText(MainActivity.this, "Mapa", Toast.LENGTH_SHORT).show();
-                        } else if (itemId == R.id.rate) {
-                            Toast.makeText(MainActivity.this, "Oceń nas", Toast.LENGTH_SHORT).show();
-                        } else if (itemId == R.id.action_settings) {
-                            Toast.makeText(MainActivity.this, "Ustawienia", Toast.LENGTH_SHORT).show();
-                        }
-                        return false;
+
+                if (drawerLayout != null && navigationView != null) {
+                    drawerToggle = new ActionBarDrawerToggle(MainActivity.this, drawerLayout, R.string.open, R.string.close);
+                    drawerLayout.addDrawerListener(drawerToggle);
+                    drawerToggle.syncState();
+
+                    if (getSupportActionBar() != null) {
+                        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
                     }
-                });
+
+                    navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+                        @Override
+                        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                            int itemId = item.getItemId();
+                            if (itemId == R.id.home) {
+                                Toast.makeText(MainActivity.this, "Strona główna", Toast.LENGTH_SHORT).show();
+                            } else if (itemId == R.id.compass) {
+                                Toast.makeText(MainActivity.this, "Kompas", Toast.LENGTH_SHORT).show();
+                            } else if (itemId == R.id.map) {
+                                Toast.makeText(MainActivity.this, "Mapa", Toast.LENGTH_SHORT).show();
+                            } else if (itemId == R.id.rate) {
+                                Toast.makeText(MainActivity.this, "Oceń nas", Toast.LENGTH_SHORT).show();
+                            } else if (itemId == R.id.action_settings) {
+                                Toast.makeText(MainActivity.this, "Ustawienia", Toast.LENGTH_SHORT).show();
+                            }
+                            return false;
+                        }
+                    });
+                }
             }
         });
+    }
+
+    private void toggleCompass() {
+        if (compassActive) {
+            compassActive = false;
+            compassLayout.setVisibility(View.GONE);
+            sensorManager.unregisterListener(sensorEventListener);
+        } else {
+            compassActive = true;
+            compassLayout.setVisibility(View.VISIBLE);
+            sensorManager.registerListener(sensorEventListener, accelerometer, SensorManager.SENSOR_DELAY_UI);
+            sensorManager.registerListener(sensorEventListener, magnetometer, SensorManager.SENSOR_DELAY_UI);
+        }
+    }
+
+    private void toggleCompassLayout() {
+        if (compassLayout.getVisibility() == View.VISIBLE) {
+            compassLayout.setVisibility(View.GONE);
+        } else {
+            compassLayout.setVisibility(View.VISIBLE);
+            // Tutaj możesz dodać kod do obsługi kompasu (np. uzyskanie kierunku i aktualizacja widoku).
+        }
+    }
+
+    private final SensorEventListener sensorEventListener = new SensorEventListener() {
+        float[] mGravity;
+        float[] mGeomagnetic;
+
+        @Override
+        public void onSensorChanged(SensorEvent sensorEvent) {
+            if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
+                mGravity = sensorEvent.values;
+            if (sensorEvent.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD)
+                mGeomagnetic = sensorEvent.values;
+            if (mGravity != null && mGeomagnetic != null) {
+                float R[] = new float[9];
+                float I[] = new float[9];
+                boolean success = SensorManager.getRotationMatrix(R, I, mGravity, mGeomagnetic);
+                if (success) {
+                    float orientation[] = new float[3];
+                    SensorManager.getOrientation(R, orientation);
+                    float azimuth = (float) Math.toDegrees(orientation[0]);
+                    compassImage.setRotation(-azimuth);
+                    updateCompassDirection(azimuth);
+                }
+            }
+        }
+
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int i) {
+            // Puste - nie potrzebujemy tego
+        }
+    };
+    private void updateCompassDirection(float azimuth) {
+        String direction;
+        if (azimuth >= -22.5 && azimuth < 22.5) {
+            direction = "Północ";
+        } else if (azimuth >= 22.5 && azimuth < 67.5) {
+            direction = "Północny-wschód";
+        } else if (azimuth >= 67.5 && azimuth < 112.5) {
+            direction = "Wschód";
+        } else if (azimuth >= 112.5 && azimuth < 157.5) {
+            direction = "Południowy-wschód";
+        } else if (azimuth >= 157.5 || azimuth < -157.5) {
+            direction = "Południe";
+        } else if (azimuth >= -157.5 && azimuth < -112.5) {
+            direction = "Południowy-zachód";
+        } else if (azimuth >= -112.5 && azimuth < -67.5) {
+            direction = "Zachód";
+        } else {
+            direction = "Północny-zachód";
+        }
+
+        compassDirection.setText(direction);
     }
 
     @Override
@@ -193,3 +294,4 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 }
+
