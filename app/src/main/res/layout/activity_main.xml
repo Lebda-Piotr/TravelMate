@@ -59,6 +59,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Ustaw miejsce docelowe" />
+
+        <!-- Dodane pole EditText do wprowadzania lokalizacji -->
+        <EditText
+            android:id="@+id/destinationEditText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="Wprowadź lokalizację"
+            android:visibility="gone" />
     </LinearLayout>
 
     <!-- Dodany element związany z kompasem -->
@@ -82,4 +90,6 @@
             android:layout_height="wrap_content"
             android:text="North" />
     </LinearLayout>
+
 </androidx.drawerlayout.widget.DrawerLayout>
+

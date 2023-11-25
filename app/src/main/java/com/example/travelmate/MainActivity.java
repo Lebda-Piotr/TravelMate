@@ -35,9 +35,11 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-
-
+import android.widget.EditText;
 import com.google.android.material.navigation.NavigationView;
+import org.osmdroid.views.overlay.Marker;
+
+
 
 public class MainActivity extends AppCompatActivity {
     private MapView mapView = null;
@@ -56,6 +58,9 @@ public class MainActivity extends AppCompatActivity {
     private Sensor accelerometer;
     private Sensor magnetometer;
     private boolean compassActive = false;
+    private EditText destinationEditText;  // Dodane pole EditText
+    private Marker destinationMarker;
+    private boolean setDestinationMode = false;  // Dodane pole do śledzenia trybu ustawiania celu
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
@@ -101,28 +106,27 @@ public class MainActivity extends AppCompatActivity {
 
         Button setDestinationButton = findViewById(R.id.setDestinationButton);
 
+        // Zainicjuj obiekt destinationMarker
+        destinationMarker = new Marker(mapView);
+        MapEventsReceiver mapEventsReceiver = new MapEventsReceiver(new MyMapClickListener());
+        mapView.getOverlays().add(mapEventsReceiver);
+
+
         // Dodane elementy związane z kompasem
         compassLayout = findViewById(R.id.compassLayout);
         compassImage = findViewById(R.id.compassImage);
         compassDirection = findViewById(R.id.compassDirection);
+        destinationEditText = findViewById(R.id.destinationEditText);  // Inicjalizacja pola EditText
 
         // Inicjalizacja sensorów do obsługi kompasu
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
 
-
-
-
-
-
-
-
         setDestinationButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // Włącz tryb ustawiania miejsca docelowego po kliknięciu przycisku
-                //enableSetDestinationMode();
+                toggleSetDestinationMode();
             }
         });
 
@@ -204,13 +208,34 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
     }
 
+    private void toggleSetDestinationMode() {
+        setDestinationMode = !setDestinationMode;
+        if (setDestinationMode) {
+            // Włącz tryb ustawiania miejsca docelowego
+            destinationEditText.setVisibility(View.VISIBLE);
+            // Możesz dodać dodatkowe działania, które mają miejsce po włączeniu trybu ustawiania celu
+        } else {
+            // Wyłącz tryb ustawiania miejsca docelowego
+            destinationEditText.setVisibility(View.GONE);
+            // Możesz dodać dodatkowe działania, które mają miejsce po wyłączeniu trybu ustawiania celu
+        }
+    }
+
+    private void handleSetDestinationClick(GeoPoint p) {
+        // Obsługa kliknięcia podczas trybu ustawiania celu
+        // Tutaj możesz dodać kod, który zapisuje lokalizację celu, wyświetla ją itp.
+        Toast.makeText(this, "Wybrano cel na mapie: " + p.getLatitude() + ", " + p.getLongitude(), Toast.LENGTH_SHORT).show();
+    }
     private void toggleCompass() {
         if (compassActive) {
             compassActive = false;
             compassLayout.setVisibility(View.GONE);
             sensorManager.unregisterListener(sensorEventListener);
+            mapView.getOverlays().remove(destinationMarker); // Usuń marker
+            mapView.invalidate(); // Odśwież mapę
         } else {
             compassActive = true;
             compassLayout.setVisibility(View.VISIBLE);
@@ -222,6 +247,8 @@ public class MainActivity extends AppCompatActivity {
     private void toggleCompassLayout() {
         if (compassLayout.getVisibility() == View.VISIBLE) {
             compassLayout.setVisibility(View.GONE);
+            mapView.getOverlays().remove(destinationMarker); // Usuń marker
+            mapView.invalidate(); // Odśwież mapę
         } else {
             compassLayout.setVisibility(View.VISIBLE);
             // Tutaj możesz dodać kod do obsługi kompasu (np. uzyskanie kierunku i aktualizacja widoku).
@@ -292,6 +319,32 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "Brak uprawnień do lokalizacji.", Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    private class MyMapClickListener implements MapEventsReceiver.OnMapClickListener {
+        @Override
+        public void onMapClick(GeoPoint point) {
+            if (setDestinationMode) {
+                handleSetDestinationClick(point);
+            }
+        }
+    }
+    private void enableSetDestinationMode() {
+        mapView.getOverlays().remove(destinationMarker); // Usuń poprzedni marker
+        mapView.invalidate(); // Odśwież mapę
+
+        MapEventsReceiver.OnMapClickListener mapClickListener = new MapEventsReceiver.OnMapClickListener() {
+            @Override
+            public void onMapClick(GeoPoint point) {
+                if (setDestinationMode) {
+                    handleSetDestinationClick(point);
+                }
+            }
+        };
+
+        MapEventsReceiver mapEventsReceiver = new MapEventsReceiver(mapClickListener); // Utwórz instancję z naszym implementatorem
+        mapView.getOverlays().add(mapEventsReceiver); // Dodaj nowy listener
+        mapView.invalidate(); // Odśwież mapę
     }
 }
 
