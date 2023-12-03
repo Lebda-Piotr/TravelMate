@@ -42,6 +42,7 @@ import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 
 
+
 import com.google.android.material.navigation.NavigationView;
 
 public class MainActivity extends AppCompatActivity {
@@ -65,23 +66,6 @@ public class MainActivity extends AppCompatActivity {
     private GeoPoint destinationPoint;
 
 
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if(drawerToggle.onOptionsItemSelected(item)) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
-            drawerLayout.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,6 +104,47 @@ public class MainActivity extends AppCompatActivity {
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+
+
+        drawerLayout = findViewById(R.id.drawer_layout);
+
+
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+                // Obsługa kliknięcia elementu menu bocznego paska
+                int itemId = menuItem.getItemId();
+                if (itemId == R.id.menu_night_mode) {
+                    // Obsługa trybu nocnego
+                } else if (itemId == R.id.menu_settings) {
+                    // Obsługa ustawień
+                } else if (itemId == R.id.menu_rate) {
+                    // Obsługa oceniania aplikacji
+                } else if (itemId == R.id.menu_authors) {
+                    // Obsługa informacji o autorach
+                }
+
+                // Zamykanie bocznego paska po kliknięciu
+                drawerLayout.closeDrawer(GravityCompat.START);
+
+                return true;
+            }
+        });
+
+        // Inicjalizacja ActionBarDrawerToggle
+        drawerToggle = new ActionBarDrawerToggle(
+                this, drawerLayout, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawerLayout.addDrawerListener(drawerToggle);
+        drawerToggle.syncState();
+
+        // Ustawienie przycisku menu do otwierania bocznego paska
+        menuButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                drawerLayout.openDrawer(GravityCompat.START);
+            }
+        });
 
         setDestinationButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -186,47 +211,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        drawerLayout = findViewById(R.id.drawer_layout);
 
-        menuButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                DrawerLayout drawerLayout;
-                NavigationView navigationView;
-
-                drawerLayout = findViewById(R.id.drawer_layout);
-                navigationView = findViewById(R.id.nav_view);
-
-                if (drawerLayout != null && navigationView != null) {
-                    drawerToggle = new ActionBarDrawerToggle(MainActivity.this, drawerLayout, R.string.open, R.string.close);
-                    drawerLayout.addDrawerListener(drawerToggle);
-                    drawerToggle.syncState();
-
-                    if (getSupportActionBar() != null) {
-                        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-                    }
-
-                    navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-                        @Override
-                        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                            int itemId = item.getItemId();
-                            if (itemId == R.id.home) {
-                                Toast.makeText(MainActivity.this, "Strona główna", Toast.LENGTH_SHORT).show();
-                            } else if (itemId == R.id.compass) {
-                                Toast.makeText(MainActivity.this, "Kompas", Toast.LENGTH_SHORT).show();
-                            } else if (itemId == R.id.map) {
-                                Toast.makeText(MainActivity.this, "Mapa", Toast.LENGTH_SHORT).show();
-                            } else if (itemId == R.id.rate) {
-                                Toast.makeText(MainActivity.this, "Oceń nas", Toast.LENGTH_SHORT).show();
-                            } else if (itemId == R.id.action_settings) {
-                                Toast.makeText(MainActivity.this, "Ustawienia", Toast.LENGTH_SHORT).show();
-                            }
-                            return false;
-                        }
-                    });
-                }
-            }
-        });
     }
 
     private void enableSetDestinationMode() {
