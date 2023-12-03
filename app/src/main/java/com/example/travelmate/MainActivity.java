@@ -41,6 +41,12 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import org.osmdroid.views.overlay.Marker;
+import org.osmdroid.bonuspack.routing.OSRMRoadManager;
+import org.osmdroid.bonuspack.routing.Road;
+import org.osmdroid.bonuspack.routing.RoadManager;
+import org.osmdroid.views.overlay.Polyline;
+import java.util.ArrayList;
+import android.os.AsyncTask;
 
 
 
@@ -65,12 +71,15 @@ public class MainActivity extends AppCompatActivity {
     private boolean compassActive = false;
     private boolean setDestinationMode = false;
     private GeoPoint destinationPoint;
+    String MY_USER_AGENT = "TravelMate";
+
 
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
 
         Context ctx = getApplicationContext();
         Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx));
@@ -228,12 +237,8 @@ public class MainActivity extends AppCompatActivity {
         if (myLocationOverlay != null && myLocationOverlay.getMyLocation() != null) {
             GeoPoint userLocation = myLocationOverlay.getMyLocation();
 
-            // Tutaj możesz wykorzystać userLocation (aktualna lokalizacja) i destination (nowe miejsce docelowe)
-            // na przykład, możesz obliczyć trasę lub po prostu wyświetlić oba punkty na mapie.
-            // Aktualnie dodajemy marker w miejscu docelowym.
-
-            // Usuń poprzednie markery
-            mapView.getOverlays().removeIf(overlay -> overlay instanceof Marker);
+            // Usuń poprzednie markery i trasy
+            mapView.getOverlays().removeIf(overlay -> overlay instanceof Marker || overlay instanceof Polyline);
 
             // Dodaj nowy marker w miejscu docelowym
             Marker destinationMarker = new Marker(mapView);
@@ -241,13 +246,37 @@ public class MainActivity extends AppCompatActivity {
             destinationMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
             mapView.getOverlays().add(destinationMarker);
 
-            // Przybliż mapę do nowego markera
-            mapController.animateTo(destination);
+            // Wykonaj operację sieciową (pobieranie trasy) w osobnym wątku
+            new AsyncTask<Void, Void, Road>() {
+                @Override
+                protected Road doInBackground(Void... params) {
+                    RoadManager roadManager = new OSRMRoadManager(MainActivity.this, MY_USER_AGENT);
+                    ArrayList<GeoPoint> waypoints = new ArrayList<>();
+                    waypoints.add(userLocation);
+                    waypoints.add(destination);
+                    return roadManager.getRoad(waypoints);
+                }
 
-            // Odśwież widok mapy
-            mapView.invalidate();
+                @Override
+                protected void onPostExecute(Road road) {
+                    // Operacje na wątku UI po zakończeniu operacji sieciowej
+                    if (road != null) {
+                        // Rysuj trasę na mapie
+                        Polyline roadOverlay = RoadManager.buildRoadOverlay(road);
+                        mapView.getOverlays().add(roadOverlay);
+
+                        // Przybliż mapę do nowego markera
+                        mapController.animateTo(destination);
+
+                        // Odśwież widok mapy
+                        mapView.invalidate();
+                    }
+                }
+            }.execute();
         }
     }
+
+
 
 
     private void toggleCompass() {
