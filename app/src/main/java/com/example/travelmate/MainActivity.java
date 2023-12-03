@@ -40,6 +40,7 @@ import org.osmdroid.views.CustomZoomButtonsController;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
+import org.osmdroid.views.overlay.Marker;
 
 
 
@@ -226,12 +227,28 @@ public class MainActivity extends AppCompatActivity {
     private void setDestination(GeoPoint destination) {
         if (myLocationOverlay != null && myLocationOverlay.getMyLocation() != null) {
             GeoPoint userLocation = myLocationOverlay.getMyLocation();
+
             // Tutaj możesz wykorzystać userLocation (aktualna lokalizacja) i destination (nowe miejsce docelowe)
             // na przykład, możesz obliczyć trasę lub po prostu wyświetlić oba punkty na mapie.
-            // Aktualnie po prostu wyświetlamy Toast z koordynatami miejsca docelowego.
-            Toast.makeText(MainActivity.this, "Miejsce docelowe: " + destination.getLatitude() + ", " + destination.getLongitude(), Toast.LENGTH_SHORT).show();
+            // Aktualnie dodajemy marker w miejscu docelowym.
+
+            // Usuń poprzednie markery
+            mapView.getOverlays().removeIf(overlay -> overlay instanceof Marker);
+
+            // Dodaj nowy marker w miejscu docelowym
+            Marker destinationMarker = new Marker(mapView);
+            destinationMarker.setPosition(destination);
+            destinationMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+            mapView.getOverlays().add(destinationMarker);
+
+            // Przybliż mapę do nowego markera
+            mapController.animateTo(destination);
+
+            // Odśwież widok mapy
+            mapView.invalidate();
         }
     }
+
 
     private void toggleCompass() {
         if (compassActive) {
