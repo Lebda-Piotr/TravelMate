@@ -47,6 +47,7 @@ import org.osmdroid.bonuspack.routing.RoadManager;
 import org.osmdroid.views.overlay.Polyline;
 import java.util.ArrayList;
 import android.os.AsyncTask;
+import android.content.Intent;
 
 
 
@@ -125,7 +126,10 @@ public class MainActivity extends AppCompatActivity {
             public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
                 // Obsługa kliknięcia elementu menu bocznego paska
                 int itemId = menuItem.getItemId();
-                if (itemId == R.id.menu_night_mode) {
+                if (itemId == R.id.menu_saved_locations) {
+                    openSavedLocationsActivity();
+                    return true;
+                } else if (itemId == R.id.menu_night_mode) {
                     // Obsługa trybu nocnego
                 } else if (itemId == R.id.menu_settings) {
                     // Obsługa ustawień
@@ -140,7 +144,12 @@ public class MainActivity extends AppCompatActivity {
 
                 return true;
             }
+            private void openSavedLocationsActivity() {
+                Intent intent = new Intent(MainActivity.this, SavedLocationsActivity.class);
+                startActivity(intent);
+            }
         });
+
 
         // Inicjalizacja ActionBarDrawerToggle
         drawerToggle = new ActionBarDrawerToggle(
