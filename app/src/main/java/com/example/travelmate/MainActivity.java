@@ -48,9 +48,10 @@ import org.osmdroid.views.overlay.Polyline;
 import java.util.ArrayList;
 import android.os.AsyncTask;
 import android.content.Intent;
+import com.example.travelmate.SavedLocationsActivity;
 
 
-
+import com.example.travelmate.database.LocationDataSource;
 import com.google.android.material.navigation.NavigationView;
 
 public class MainActivity extends AppCompatActivity {
@@ -282,6 +283,20 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             }.execute();
+        }
+        // Dodaj nową lokalizację do bazy danych
+        addLocationToDatabase("Destination", destination.getLatitude(), destination.getLongitude());
+    }
+    private void addLocationToDatabase(String locationName, double latitude, double longitude) {
+        LocationDataSource dataSource = new LocationDataSource(this);
+        dataSource.open();
+        long result = dataSource.addLocation(locationName, latitude, longitude);
+        dataSource.close();
+
+        if (result != -1) {
+            Toast.makeText(this, "Dodano lokalizację do bazy danych", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "Błąd podczas dodawania lokalizacji do bazy danych", Toast.LENGTH_SHORT).show();
         }
     }
 
