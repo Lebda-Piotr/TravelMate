@@ -15,6 +15,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COLUMN_LOCATION_NAME = "location_name";
     public static final String COLUMN_LATITUDE = "latitude";
     public static final String COLUMN_LONGITUDE = "longitude";
+    public static final String COLUMN_IS_MANUAL = "is_manual";
+
 
     // Konstruktor
     public DatabaseHelper(Context context) {
@@ -29,9 +31,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + COLUMN_LOCATION_NAME + " TEXT, "
                 + COLUMN_LATITUDE + " REAL, "
-                + COLUMN_LONGITUDE + " REAL);";
+                + COLUMN_LONGITUDE + " REAL, "
+                + COLUMN_IS_MANUAL + " INTEGER);";
         db.execSQL(createTableQuery);
     }
+
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {

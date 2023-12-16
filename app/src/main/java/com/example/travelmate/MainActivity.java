@@ -1,5 +1,6 @@
 package com.example.travelmate;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.app.Activity;
 import android.view.MenuItem;
@@ -49,6 +50,10 @@ import java.util.ArrayList;
 import android.os.AsyncTask;
 import android.content.Intent;
 import com.example.travelmate.SavedLocationsActivity;
+import androidx.appcompat.app.AlertDialog;
+import com.example.travelmate.database.LocationModel;
+import java.util.List;
+
 
 
 import com.example.travelmate.database.LocationDataSource;
@@ -123,10 +128,9 @@ public class MainActivity extends AppCompatActivity {
 
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-            @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-                // Obsługa kliknięcia elementu menu bocznego paska
                 int itemId = menuItem.getItemId();
+
                 if (itemId == R.id.menu_saved_locations) {
                     openSavedLocationsActivity();
                     return true;
@@ -136,8 +140,10 @@ public class MainActivity extends AppCompatActivity {
                     // Obsługa ustawień
                 } else if (itemId == R.id.menu_rate) {
                     // Obsługa oceniania aplikacji
-                } else if (itemId == R.id.menu_authors) {
-                    // Obsługa informacji o autorach
+                } else if (itemId == R.id.menu_history) {
+                    // Obsługa przycisku "Historia"
+                    showHistoryDialog();
+                    return true;
                 }
 
                 // Zamykanie bocznego paska po kliknięciu
@@ -145,6 +151,44 @@ public class MainActivity extends AppCompatActivity {
 
                 return true;
             }
+            private void showHistoryDialog() {
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                builder.setTitle("Historia tras");
+
+                // Pobierz historię tras z bazy danych
+                List<LocationModel> history = getHistoryFromDatabase();
+
+                // Przygotuj listę stringów z historią tras do wyświetlenia
+                List<String> historyStrings = new ArrayList<>();
+                for (LocationModel location : history) {
+                    historyStrings.add("Trasa: " + location.getLocationName());
+                }
+
+                // Przygotuj array z historią tras
+                String[] historyArray = new String[historyStrings.size()];
+                historyArray = historyStrings.toArray(historyArray);
+
+                builder.setItems(historyArray, null);
+
+                builder.setPositiveButton("Zamknij", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.dismiss();
+                    }
+                });
+
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }
+
+            // Dodaj metodę do pobierania historii tras z bazy danych
+            private List<LocationModel> getHistoryFromDatabase() {
+                LocationDataSource dataSource = new LocationDataSource(MainActivity.this);
+                dataSource.open();
+                List<LocationModel> history = dataSource.getAllLocations();
+                dataSource.close();
+                return history;
+            }
+
             private void openSavedLocationsActivity() {
                 Intent intent = new Intent(MainActivity.this, SavedLocationsActivity.class);
                 startActivity(intent);
@@ -290,7 +334,7 @@ public class MainActivity extends AppCompatActivity {
     private void addLocationToDatabase(String locationName, double latitude, double longitude) {
         LocationDataSource dataSource = new LocationDataSource(this);
         dataSource.open();
-        long result = dataSource.addLocation(locationName, latitude, longitude);
+        long result = dataSource.addLocation(locationName, latitude, longitude, false);
         dataSource.close();
 
         if (result != -1) {
