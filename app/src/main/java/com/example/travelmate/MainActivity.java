@@ -290,7 +290,7 @@ public class MainActivity extends AppCompatActivity {
     private void addLocationToDatabase(String locationName, double latitude, double longitude) {
         LocationDataSource dataSource = new LocationDataSource(this);
         dataSource.open();
-        long result = dataSource.addLocation(locationName, latitude, longitude);
+        long result = dataSource.addLocation(locationName, latitude, longitude, false);
         dataSource.close();
 
         if (result != -1) {

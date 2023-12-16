@@ -38,5 +38,15 @@ public class LocationModel {
     public void setLongitude(double longitude) {
         this.longitude = longitude;
     }
+
+    private boolean isManual;
+
+    public boolean isManual() {
+        return isManual;
+    }
+
+    public void setManual(boolean manual) {
+        isManual = manual;
+    }
 }
 

@@ -33,16 +33,65 @@ public class LocationDataSource {
     }
 
     // Dodaj nową lokalizację do bazy danych
-    public long addLocation(String locationName, double latitude, double longitude) {
+    public long addLocation(String locationName, double latitude, double longitude, boolean isManual) {
+        // Sprawdź ilość zapisanych lokalizacji
+        if (getAllLocations().size() >= 5) {
+            // Pobierz id najstarszej lokalizacji
+            long oldestLocationId = getOldestLocationId();
+            // Nadpisz najstarszą lokalizację
+            updateLocation(oldestLocationId, locationName, latitude, longitude, isManual);
+            return oldestLocationId;
+        } else {
+            ContentValues values = new ContentValues();
+            values.put(DatabaseHelper.COLUMN_LOCATION_NAME, locationName);
+            values.put(DatabaseHelper.COLUMN_LATITUDE, latitude);
+            values.put(DatabaseHelper.COLUMN_LONGITUDE, longitude);
+            values.put(DatabaseHelper.COLUMN_IS_MANUAL, isManual ? 1 : 0); // 1 for true, 0 for false
+
+            return database.insert(DatabaseHelper.TABLE_LOCATIONS, null, values);
+        }
+    }
+
+    // Pobierz ID najstarszej lokalizacji
+    private long getOldestLocationId() {
+        String orderBy = DatabaseHelper.COLUMN_ID + " ASC";
+        Cursor cursor = database.query(
+                DatabaseHelper.TABLE_LOCATIONS,
+                new String[]{DatabaseHelper.COLUMN_ID},
+                null,
+                null,
+                null,
+                null,
+                orderBy,
+                "1"
+        );
+
+        long oldestId = -1;
+        if (cursor.moveToFirst()) {
+            oldestId = cursor.getLong(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_ID));
+        }
+
+        cursor.close();
+        return oldestId;
+    }
+
+
+    // Aktualizuj lokalizację
+    private void updateLocation(long locationId, String locationName, double latitude, double longitude, boolean isManual) {
         ContentValues values = new ContentValues();
         values.put(DatabaseHelper.COLUMN_LOCATION_NAME, locationName);
         values.put(DatabaseHelper.COLUMN_LATITUDE, latitude);
         values.put(DatabaseHelper.COLUMN_LONGITUDE, longitude);
+        values.put(DatabaseHelper.COLUMN_IS_MANUAL, isManual ? 1 : 0); // 1 for true, 0 for false
 
-        return database.insert(DatabaseHelper.TABLE_LOCATIONS, null, values);
+        String selection = DatabaseHelper.COLUMN_ID + " = ?";
+        String[] selectionArgs = {String.valueOf(locationId)};
+
+        database.update(DatabaseHelper.TABLE_LOCATIONS, values, selection, selectionArgs);
     }
 
-    // Pobierz wszystkie zapisane lokalizacje
+
+        // Pobierz wszystkie zapisane lokalizacje
     public List<LocationModel> getAllLocations() {
         List<LocationModel> locations = new ArrayList<>();
 
