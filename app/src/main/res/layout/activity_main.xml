@@ -8,6 +8,14 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+    <com.google.android.material.navigation.NavigationView
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        app:headerLayout="@layout/header"
+        app:menu="@menu/menu_main"
+        android:id="@+id/nav_view"
+        android:layout_gravity="start" />
+
     <!-- Mapa OpenStreetMap (MapView) -->
     <org.osmdroid.views.MapView
         android:id="@+id/mapView"
@@ -75,13 +83,30 @@
             android:text="North" />
     </LinearLayout>
 
-    <!-- Dodane NavigationView -->
-    <com.google.android.material.navigation.NavigationView
-        android:id="@+id/nav_view"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="start"
-        app:headerLayout="@layout/nav_header"
-        app:menu="@menu/nav_menu" />
+    <!-- Dodany obszar dla trybu "Ustaw miejsce docelowe" -->
+    <RelativeLayout
+        android:id="@+id/setDestinationLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentTop="true"
+        android:visibility="gone">
 
+        <!-- Input do wpisywania lokalizacji -->
+        <EditText
+            android:id="@+id/destinationEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Wprowadź lokalizację" />
+
+        <!-- Przycisk do potwierdzenia wybranej lokalizacji -->
+        <Button
+            android:id="@+id/confirmDestinationButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Potwierdź"
+            android:layout_below="@id/destinationEditText"
+            android:layout_marginTop="8dp" />
+    </RelativeLayout>
 </androidx.drawerlayout.widget.DrawerLayout>

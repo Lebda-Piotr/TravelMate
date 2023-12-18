@@ -8,9 +8,6 @@
     <string name="previous">Previous</string>]
     <string name="open">Open Navigation Drawer</string>
     <string name="close">Close Navigation Drawer</string>
-    <string name="navigation_drawer_open">Otwórz pasek boczny</string>
-    <string name="navigation_drawer_close">Zamknij pasek boczny</string>
-
 
     <string name="lorem_ipsum">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in scelerisque sem. Mauris

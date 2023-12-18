@@ -5,7 +5,6 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
         maven(url = "https://clojars.org/repo")
-        maven(url = "https://jitpack.io")
     }
 }
 dependencyResolutionManagement {
@@ -13,7 +12,6 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven(url = "https://jitpack.io")
     }
 }
 
