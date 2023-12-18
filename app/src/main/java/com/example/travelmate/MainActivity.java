@@ -208,21 +208,28 @@ public class MainActivity extends AppCompatActivity {
 
                     navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
                         @Override
-                        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                            int itemId = item.getItemId();
-                            if (itemId == R.id.home) {
-                                Toast.makeText(MainActivity.this, "Strona główna", Toast.LENGTH_SHORT).show();
-                            } else if (itemId == R.id.compass) {
-                                Toast.makeText(MainActivity.this, "Kompas", Toast.LENGTH_SHORT).show();
-                            } else if (itemId == R.id.map) {
-                                Toast.makeText(MainActivity.this, "Mapa", Toast.LENGTH_SHORT).show();
-                            } else if (itemId == R.id.rate) {
-                                Toast.makeText(MainActivity.this, "Oceń nas", Toast.LENGTH_SHORT).show();
-                            } else if (itemId == R.id.action_settings) {
-                                Toast.makeText(MainActivity.this, "Ustawienia", Toast.LENGTH_SHORT).show();
+                        public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+                            int itemId = menuItem.getItemId();
+                            if (itemId == R.id.menu_saved_locations) {
+                                openSavedLocationsActivity();
+                                return true;
+                            } else if (itemId == R.id.menu_night_mode) {
+                                // Obsługa trybu nocnego
+                            } else if (itemId == R.id.menu_settings) {
+                                // Obsługa ustawień
+                            } else if (itemId == R.id.menu_rate) {
+                                // Obsługa oceniania aplikacji
+                            } else if (itemId == R.id.menu_authors) {
+                                // Zmiana "informacje o autorach" na "historia"
+                                openHistoryDialog();
+                                return true;
                             }
-                            return false;
-                        }
+
+                            // Zamykanie bocznego paska po kliknięciu
+                            drawerLayout.closeDrawer(GravityCompat.START);
+
+                            return true;
+
                     });
                 }
             }
