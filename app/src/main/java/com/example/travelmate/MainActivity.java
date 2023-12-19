@@ -1,5 +1,6 @@
 package com.example.travelmate;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.app.Activity;
 import android.view.MenuItem;
@@ -40,8 +41,22 @@ import org.osmdroid.views.CustomZoomButtonsController;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
+import org.osmdroid.views.overlay.Marker;
+import org.osmdroid.bonuspack.routing.OSRMRoadManager;
+import org.osmdroid.bonuspack.routing.Road;
+import org.osmdroid.bonuspack.routing.RoadManager;
+import org.osmdroid.views.overlay.Polyline;
+import java.util.ArrayList;
+import android.os.AsyncTask;
+import android.content.Intent;
+import com.example.travelmate.SavedLocationsActivity;
+import androidx.appcompat.app.AlertDialog;
+import com.example.travelmate.database.LocationModel;
+import java.util.List;
 
 
+
+import com.example.travelmate.database.LocationDataSource;
 import com.google.android.material.navigation.NavigationView;
 
 public class MainActivity extends AppCompatActivity {
@@ -63,29 +78,15 @@ public class MainActivity extends AppCompatActivity {
     private boolean compassActive = false;
     private boolean setDestinationMode = false;
     private GeoPoint destinationPoint;
+    String MY_USER_AGENT = "TravelMate";
 
 
 
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if(drawerToggle.onOptionsItemSelected(item)) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
-            drawerLayout.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
 
         Context ctx = getApplicationContext();
         Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx));
@@ -120,6 +121,94 @@ public class MainActivity extends AppCompatActivity {
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+
+
+        drawerLayout = findViewById(R.id.drawer_layout);
+
+
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+                int itemId = menuItem.getItemId();
+
+                if (itemId == R.id.menu_saved_locations) {
+                    openSavedLocationsActivity();
+                    return true;
+                } else if (itemId == R.id.menu_night_mode) {
+                    // Obsługa trybu nocnego
+                } else if (itemId == R.id.menu_settings) {
+                    // Obsługa ustawień
+                } else if (itemId == R.id.menu_rate) {
+                    // Obsługa oceniania aplikacji
+                } else if (itemId == R.id.menu_history) {
+                    // Obsługa przycisku "Historia"
+                    showHistoryDialog();
+                    return true;
+                }
+
+                // Zamykanie bocznego paska po kliknięciu
+                drawerLayout.closeDrawer(GravityCompat.START);
+
+                return true;
+            }
+            private void showHistoryDialog() {
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                builder.setTitle("Historia tras");
+
+                // Pobierz historię tras z bazy danych
+                List<LocationModel> history = getHistoryFromDatabase();
+
+                // Przygotuj listę stringów z historią tras do wyświetlenia
+                List<String> historyStrings = new ArrayList<>();
+                for (LocationModel location : history) {
+                    historyStrings.add("Trasa: " + location.getLocationName());
+                }
+
+                // Przygotuj array z historią tras
+                String[] historyArray = new String[historyStrings.size()];
+                historyArray = historyStrings.toArray(historyArray);
+
+                builder.setItems(historyArray, null);
+
+                builder.setPositiveButton("Zamknij", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.dismiss();
+                    }
+                });
+
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }
+
+            // Dodaj metodę do pobierania historii tras z bazy danych
+            private List<LocationModel> getHistoryFromDatabase() {
+                LocationDataSource dataSource = new LocationDataSource(MainActivity.this);
+                dataSource.open();
+                List<LocationModel> history = dataSource.getAllLocations();
+                dataSource.close();
+                return history;
+            }
+
+            private void openSavedLocationsActivity() {
+                Intent intent = new Intent(MainActivity.this, SavedLocationsActivity.class);
+                startActivity(intent);
+            }
+        });
+
+
+        // Inicjalizacja ActionBarDrawerToggle
+        drawerToggle = new ActionBarDrawerToggle(
+                this, drawerLayout, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawerLayout.addDrawerListener(drawerToggle);
+        drawerToggle.syncState();
+
+        // Ustawienie przycisku menu do otwierania bocznego paska
+        menuButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                drawerLayout.openDrawer(GravityCompat.START);
+            }
+        });
 
         setDestinationButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -186,54 +275,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        drawerLayout = findViewById(R.id.drawer_layout);
 
-        menuButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                DrawerLayout drawerLayout;
-                NavigationView navigationView;
-
-                drawerLayout = findViewById(R.id.drawer_layout);
-                navigationView = findViewById(R.id.nav_view);
-
-                if (drawerLayout != null && navigationView != null) {
-                    drawerToggle = new ActionBarDrawerToggle(MainActivity.this, drawerLayout, R.string.open, R.string.close);
-                    drawerLayout.addDrawerListener(drawerToggle);
-                    drawerToggle.syncState();
-
-                    if (getSupportActionBar() != null) {
-                        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-                    }
-
-                    navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-                        @Override
-                        public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-                            int itemId = menuItem.getItemId();
-                            if (itemId == R.id.menu_saved_locations) {
-                                openSavedLocationsActivity();
-                                return true;
-                            } else if (itemId == R.id.menu_night_mode) {
-                                // Obsługa trybu nocnego
-                            } else if (itemId == R.id.menu_settings) {
-                                // Obsługa ustawień
-                            } else if (itemId == R.id.menu_rate) {
-                                // Obsługa oceniania aplikacji
-                            } else if (itemId == R.id.menu_authors) {
-                                // Zmiana "informacje o autorach" na "historia"
-                                openHistoryDialog();
-                                return true;
-                            }
-
-                            // Zamykanie bocznego paska po kliknięciu
-                            drawerLayout.closeDrawer(GravityCompat.START);
-
-                            return true;
-
-                    });
-                }
-            }
-        });
     }
 
     private void enableSetDestinationMode() {
@@ -248,12 +290,62 @@ public class MainActivity extends AppCompatActivity {
     private void setDestination(GeoPoint destination) {
         if (myLocationOverlay != null && myLocationOverlay.getMyLocation() != null) {
             GeoPoint userLocation = myLocationOverlay.getMyLocation();
-            // Tutaj możesz wykorzystać userLocation (aktualna lokalizacja) i destination (nowe miejsce docelowe)
-            // na przykład, możesz obliczyć trasę lub po prostu wyświetlić oba punkty na mapie.
-            // Aktualnie po prostu wyświetlamy Toast z koordynatami miejsca docelowego.
-            Toast.makeText(MainActivity.this, "Miejsce docelowe: " + destination.getLatitude() + ", " + destination.getLongitude(), Toast.LENGTH_SHORT).show();
+
+            // Usuń poprzednie markery i trasy
+            mapView.getOverlays().removeIf(overlay -> overlay instanceof Marker || overlay instanceof Polyline);
+
+            // Dodaj nowy marker w miejscu docelowym
+            Marker destinationMarker = new Marker(mapView);
+            destinationMarker.setPosition(destination);
+            destinationMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+            mapView.getOverlays().add(destinationMarker);
+
+            // Wykonaj operację sieciową (pobieranie trasy) w osobnym wątku
+            new AsyncTask<Void, Void, Road>() {
+                @Override
+                protected Road doInBackground(Void... params) {
+                    RoadManager roadManager = new OSRMRoadManager(MainActivity.this, MY_USER_AGENT);
+                    ArrayList<GeoPoint> waypoints = new ArrayList<>();
+                    waypoints.add(userLocation);
+                    waypoints.add(destination);
+                    return roadManager.getRoad(waypoints);
+                }
+
+                @Override
+                protected void onPostExecute(Road road) {
+                    // Operacje na wątku UI po zakończeniu operacji sieciowej
+                    if (road != null) {
+                        // Rysuj trasę na mapie
+                        Polyline roadOverlay = RoadManager.buildRoadOverlay(road);
+                        mapView.getOverlays().add(roadOverlay);
+
+                        // Przybliż mapę do nowego markera
+                        mapController.animateTo(destination);
+
+                        // Odśwież widok mapy
+                        mapView.invalidate();
+                    }
+                }
+            }.execute();
+        }
+        // Dodaj nową lokalizację do bazy danych
+        addLocationToDatabase("Destination", destination.getLatitude(), destination.getLongitude());
+    }
+    private void addLocationToDatabase(String locationName, double latitude, double longitude) {
+        LocationDataSource dataSource = new LocationDataSource(this);
+        dataSource.open();
+        long result = dataSource.addLocation(locationName, latitude, longitude, false);
+        dataSource.close();
+
+        if (result != -1) {
+            Toast.makeText(this, "Dodano lokalizację do bazy danych", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "Błąd podczas dodawania lokalizacji do bazy danych", Toast.LENGTH_SHORT).show();
         }
     }
+
+
+
 
     private void toggleCompass() {
         if (compassActive) {
