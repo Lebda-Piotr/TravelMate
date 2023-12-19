@@ -168,7 +168,15 @@ public class MainActivity extends AppCompatActivity {
                 String[] historyArray = new String[historyStrings.size()];
                 historyArray = historyStrings.toArray(historyArray);
 
-                builder.setItems(historyArray, null);
+                builder.setItems(historyArray, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // Obsługa kliknięcia na element historii
+                        // Ustaw cel docelowy na mapie dla wybranego elementu
+                        setDestination(history.get(which).getGeoPoint());
+                        dialog.dismiss();
+                    }
+                });
 
                 builder.setPositiveButton("Zamknij", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {

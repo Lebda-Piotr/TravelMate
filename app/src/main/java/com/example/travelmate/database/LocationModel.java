@@ -1,5 +1,7 @@
 package com.example.travelmate.database;
 
+import org.osmdroid.util.GeoPoint;
+
 public class LocationModel {
 
     private long id;
@@ -47,6 +49,10 @@ public class LocationModel {
 
     public void setManual(boolean manual) {
         isManual = manual;
+    }
+
+    public GeoPoint getGeoPoint() {
+        return new GeoPoint(latitude, longitude);
     }
 }
 
