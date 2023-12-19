@@ -174,6 +174,10 @@ public class MainActivity extends AppCompatActivity {
                         // Obsługa kliknięcia na element historii
                         // Ustaw cel docelowy na mapie dla wybranego elementu
                         setDestination(history.get(which).getGeoPoint());
+
+                        // Zamknij boczne menu po kliknięciu na rekord
+                        drawerLayout.closeDrawer(GravityCompat.START);
+
                         dialog.dismiss();
                     }
                 });
