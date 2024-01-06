@@ -145,11 +145,18 @@ public class MainActivity extends AppCompatActivity {
                     showHistoryDialog();
                     return true;
                 }
-
+                else if (itemId == R.id.menu_add_location) {
+                    openAddLocationDialog();
+                    return true;
+                }
                 // Zamykanie bocznego paska po kliknięciu
                 drawerLayout.closeDrawer(GravityCompat.START);
 
                 return true;
+            }
+            private void openAddLocationDialog() {
+                // Tutaj dodaj kod otwierający dialog do wpisywania adresu i zapisywania lokalizacji w bazie danych
+                // np. poprzez AlertDialog z polami do wprowadzania tekstu, przyciskami "Zapisz" i "Anuluj"
             }
             private void showHistoryDialog() {
                 AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
