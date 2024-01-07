@@ -173,13 +173,9 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         String address = input.getText().toString();
-                        // Tutaj skorzystaj z Geocoder lub innego sposobu konwersji adresu na GeoPoint
-                        GeoPoint customLocation = convertAddressToGeoPoint(address);
 
-                        // Dodaj lokalizację do bazy danych
-                        addLocationToDatabase("Custom Location", customLocation.getLatitude(), customLocation.getLongitude(), true);
-
-                        // Odśwież mapę lub wykonaj inne niezbędne kroki
+                        // Uruchom AsyncTask do konwersji adresu na GeoPoint
+                        new ConvertAddressTask().execute(address);
                     }
                 });
 
@@ -192,6 +188,27 @@ public class MainActivity extends AppCompatActivity {
 
                 builder.show();
             }
+            class ConvertAddressTask extends AsyncTask<String, Void, GeoPoint> {
+                @Override
+                protected GeoPoint doInBackground(String... params) {
+                    String address = params[0];
+                    return convertAddressToGeoPoint(address);
+                }
+
+                @Override
+                protected void onPostExecute(GeoPoint result) {
+                    if (result != null) {
+                        // Dodaj lokalizację do bazy danych
+                        addLocationToDatabase("Custom Location", result.getLatitude(), result.getLongitude(), true);
+
+                        // Odśwież mapę lub wykonaj inne niezbędne kroki
+                    } else {
+                        // Obsłuż błąd konwersji adresu
+                        Toast.makeText(getApplicationContext(), "Nie można znaleźć adresu.", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+
 
             private GeoPoint convertAddressToGeoPoint(String address) {
                 // Utwórz obiekt Locale z aktualnego kontekstu
