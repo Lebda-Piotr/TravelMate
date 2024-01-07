@@ -53,6 +53,12 @@ import com.example.travelmate.SavedLocationsActivity;
 import androidx.appcompat.app.AlertDialog;
 import com.example.travelmate.database.LocationModel;
 import java.util.List;
+import android.location.Address;
+import android.text.InputType;
+import android.widget.EditText;
+import org.osmdroid.bonuspack.location.GeocoderNominatim;
+import java.io.IOException;
+import java.util.Locale;
 
 
 
@@ -155,8 +161,79 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
             private void openAddLocationDialog() {
-                // Tutaj dodaj kod otwierający dialog do wpisywania adresu i zapisywania lokalizacji w bazie danych
-                // np. poprzez AlertDialog z polami do wprowadzania tekstu, przyciskami "Zapisz" i "Anuluj"
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                builder.setTitle("Dodaj własną lokalizację");
+
+                // Dodaj pola do wprowadzania tekstu dla adresu
+                final EditText input = new EditText(MainActivity.this);
+                input.setInputType(InputType.TYPE_CLASS_TEXT);
+                builder.setView(input);
+
+                builder.setPositiveButton("Zapisz", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String address = input.getText().toString();
+                        // Tutaj skorzystaj z Geocoder lub innego sposobu konwersji adresu na GeoPoint
+                        GeoPoint customLocation = convertAddressToGeoPoint(address);
+
+                        // Dodaj lokalizację do bazy danych
+                        addLocationToDatabase("Custom Location", customLocation.getLatitude(), customLocation.getLongitude(), true);
+
+                        // Odśwież mapę lub wykonaj inne niezbędne kroki
+                    }
+                });
+
+                builder.setNegativeButton("Anuluj", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+
+                builder.show();
+            }
+
+            private GeoPoint convertAddressToGeoPoint(String address) {
+                // Utwórz obiekt Locale z aktualnego kontekstu
+                Locale currentLocale = getResources().getConfiguration().locale;
+
+                // Utwórz obiekt GeocoderNominatim z aktualnym kontekstem i obiektem Locale
+                GeocoderNominatim geocoder = new GeocoderNominatim(currentLocale, MY_USER_AGENT);
+                GeoPoint geoPoint = null;
+
+                try {
+                    List<Address> addresses = geocoder.getFromLocationName(address, 1);
+                    if (addresses != null && addresses.size() > 0) {
+                        Address foundAddress = addresses.get(0);
+                        double latitude = foundAddress.getLatitude();
+                        double longitude = foundAddress.getLongitude();
+                        geoPoint = new GeoPoint(latitude, longitude);
+                    } else {
+                        // Adres nie został odnaleziony, obsłuż tę sytuację odpowiednio
+                        // np. wyświetl błąd użytkownikowi
+                        Toast.makeText(getApplicationContext(), "Nie można znaleźć adresu.", Toast.LENGTH_SHORT).show();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    // Obsłuż błąd wejścia/wyjścia, jeśli wystąpi
+                    // np. wyświetl błąd użytkownikowi
+                    Toast.makeText(getApplicationContext(), "Wystąpił błąd podczas konwersji adresu.", Toast.LENGTH_SHORT).show();
+                }
+
+                return geoPoint;
+            }
+
+            private void addLocationToDatabase(String locationName, double latitude, double longitude, boolean manual) {
+                LocationDataSource dataSource = new LocationDataSource(MainActivity.this);
+                dataSource.open();
+                long result = dataSource.addLocation(locationName, latitude, longitude, manual);
+                dataSource.close();
+
+                if (result != -1) {
+                    Toast.makeText(MainActivity.this, "Dodano lokalizację do bazy danych", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(MainActivity.this, "Błąd podczas dodawania lokalizacji do bazy danych", Toast.LENGTH_SHORT).show();
+                }
             }
             private void showHistoryDialog() {
                 AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
