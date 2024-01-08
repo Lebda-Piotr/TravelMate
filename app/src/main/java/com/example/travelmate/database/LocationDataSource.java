@@ -116,6 +116,34 @@ public class LocationDataSource {
         return locations;
     }
 
+    // Pobierz tylko lokalizacje zapisane przez użytkownika
+    public List<LocationModel> getUserLocations() {
+        List<LocationModel> userLocations = new ArrayList<>();
+
+        String selection = DatabaseHelper.COLUMN_IS_MANUAL + " = ?";
+        String[] selectionArgs = {"1"}; // 1 for true
+
+        Cursor cursor = database.query(
+                DatabaseHelper.TABLE_LOCATIONS,
+                null,
+                selection,
+                selectionArgs,
+                null,
+                null,
+                null
+        );
+
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            LocationModel location = cursorToLocation(cursor);
+            userLocations.add(location);
+            cursor.moveToNext();
+        }
+
+        cursor.close();
+        return userLocations;
+    }
+
     // Usuń lokalizację z bazy danych
     public void deleteLocation(long locationId) {
         database.delete(
@@ -137,5 +165,15 @@ public class LocationDataSource {
         location.setLatitude(cursor.getDouble(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_LATITUDE)));
         location.setLongitude(cursor.getDouble(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_LONGITUDE)));
         return location;
+    }
+    // Aktualizuj nazwę lokalizacji
+    public void updateLocationName(long locationId, String newLocationName) {
+        ContentValues values = new ContentValues();
+        values.put(DatabaseHelper.COLUMN_LOCATION_NAME, newLocationName);
+
+        String selection = DatabaseHelper.COLUMN_ID + " = ?";
+        String[] selectionArgs = {String.valueOf(locationId)};
+
+        database.update(DatabaseHelper.TABLE_LOCATIONS, values, selection, selectionArgs);
     }
 }
