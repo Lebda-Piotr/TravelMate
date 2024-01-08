@@ -33,20 +33,21 @@ public class LocationDataSource {
     }
 
     // Dodaj nową lokalizację do bazy danych
-    public long addLocation(String locationName, double latitude, double longitude, boolean isManual) {
+    public long addLocation(String locationName, double latitude, double longitude, String address, boolean isManual) {
         // Sprawdź ilość zapisanych lokalizacji
         if (getAllLocations().size() >= 5) {
             // Pobierz id najstarszej lokalizacji
             long oldestLocationId = getOldestLocationId();
             // Nadpisz najstarszą lokalizację
-            updateLocation(oldestLocationId, locationName, latitude, longitude, isManual);
+            updateLocation(oldestLocationId, locationName, latitude, longitude, address, isManual);
             return oldestLocationId;
         } else {
             ContentValues values = new ContentValues();
             values.put(DatabaseHelper.COLUMN_LOCATION_NAME, locationName);
             values.put(DatabaseHelper.COLUMN_LATITUDE, latitude);
             values.put(DatabaseHelper.COLUMN_LONGITUDE, longitude);
-            values.put(DatabaseHelper.COLUMN_IS_MANUAL, isManual ? 1 : 0); // 1 for true, 0 for false
+            values.put(DatabaseHelper.COLUMN_IS_MANUAL, isManual ? 1 : 0);
+            values.put(DatabaseHelper.COLUMN_ADDRESS, address); // Dodaj adres do bazy danych
 
             return database.insert(DatabaseHelper.TABLE_LOCATIONS, null, values);
         }
@@ -77,11 +78,12 @@ public class LocationDataSource {
 
 
     // Aktualizuj lokalizację
-    private void updateLocation(long locationId, String locationName, double latitude, double longitude, boolean isManual) {
+    private void updateLocation(long locationId, String locationName, double latitude, double longitude, String address, boolean isManual) {
         ContentValues values = new ContentValues();
         values.put(DatabaseHelper.COLUMN_LOCATION_NAME, locationName);
         values.put(DatabaseHelper.COLUMN_LATITUDE, latitude);
         values.put(DatabaseHelper.COLUMN_LONGITUDE, longitude);
+        values.put(DatabaseHelper.COLUMN_ADDRESS, address);  // Dodaj adres do kolumny
         values.put(DatabaseHelper.COLUMN_IS_MANUAL, isManual ? 1 : 0); // 1 for true, 0 for false
 
         String selection = DatabaseHelper.COLUMN_ID + " = ?";

@@ -3,6 +3,7 @@ package com.example.travelmate;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.app.Activity;
+import android.util.Pair;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -188,18 +189,20 @@ public class MainActivity extends AppCompatActivity {
 
                 builder.show();
             }
-            class ConvertAddressTask extends AsyncTask<String, Void, GeoPoint> {
+            class ConvertAddressTask extends AsyncTask<String, Void, Pair<GeoPoint, String>> {
+
                 @Override
-                protected GeoPoint doInBackground(String... params) {
+                protected Pair<GeoPoint, String> doInBackground(String... params) {
                     String address = params[0];
-                    return convertAddressToGeoPoint(address);
+                    GeoPoint geoPoint = convertAddressToGeoPoint(address);
+                    return new Pair<>(geoPoint, address);
                 }
 
                 @Override
-                protected void onPostExecute(GeoPoint result) {
-                    if (result != null) {
-                        // Dodaj lokalizację do bazy danych
-                        addLocationToDatabase("Custom Location", result.getLatitude(), result.getLongitude(), true);
+                protected void onPostExecute(Pair<GeoPoint, String> result) {
+                    if (result.first != null) {
+                        // Dodaj lokalizację do bazy danych z adresem
+                        addLocationToDatabase("Custom Location", result.first.getLatitude(), result.first.getLongitude(), true, result.second);
 
                         // Odśwież mapę lub wykonaj inne niezbędne kroki
                     } else {
@@ -240,10 +243,10 @@ public class MainActivity extends AppCompatActivity {
                 return geoPoint;
             }
 
-            private void addLocationToDatabase(String locationName, double latitude, double longitude, boolean manual) {
+            private void addLocationToDatabase(String locationName, double latitude, double longitude, boolean isManual, String address) {
                 LocationDataSource dataSource = new LocationDataSource(MainActivity.this);
                 dataSource.open();
-                long result = dataSource.addLocation(locationName, latitude, longitude, manual);
+                long result = dataSource.addLocation(locationName, latitude, longitude, address, isManual);
                 dataSource.close();
 
                 if (result != -1) {
@@ -442,12 +445,12 @@ public class MainActivity extends AppCompatActivity {
             }.execute();
         }
         // Dodaj nową lokalizację do bazy danych
-        addLocationToDatabase("Destination", destination.getLatitude(), destination.getLongitude());
+        addLocationToDatabase("Cel podróży", destination.getLatitude(), destination.getLongitude());
     }
     private void addLocationToDatabase(String locationName, double latitude, double longitude) {
         LocationDataSource dataSource = new LocationDataSource(this);
         dataSource.open();
-        long result = dataSource.addLocation(locationName, latitude, longitude, false);
+        long result = dataSource.addLocation(locationName, latitude, longitude, "" ,false);
         dataSource.close();
 
         if (result != -1) {
