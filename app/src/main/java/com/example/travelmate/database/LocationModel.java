@@ -54,5 +54,14 @@ public class LocationModel {
     public GeoPoint getGeoPoint() {
         return new GeoPoint(latitude, longitude);
     }
+    private String address;
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
 }
 

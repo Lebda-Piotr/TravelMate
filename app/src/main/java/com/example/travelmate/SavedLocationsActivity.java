@@ -35,7 +35,7 @@ public class SavedLocationsActivity extends AppCompatActivity implements Adapter
         loadLocations();
 
         // Utworzenie adaptera i przypisanie go do listy
-        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, locations);
+        adapter = new CustomLocationAdapter(this, android.R.layout.simple_list_item_1, locations);
         locationsListView.setAdapter(adapter);
     }
 
@@ -122,7 +122,7 @@ public class SavedLocationsActivity extends AppCompatActivity implements Adapter
         // Pobranie danych z bazy danych
         LocationDataSource dataSource = new LocationDataSource(this);
         dataSource.open();
-        locations = dataSource.getAllLocations();
+        locations = dataSource.getUserLocations();
         dataSource.close();
     }
 

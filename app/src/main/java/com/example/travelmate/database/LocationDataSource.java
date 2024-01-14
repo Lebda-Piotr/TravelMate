@@ -166,6 +166,7 @@ public class LocationDataSource {
         location.setLocationName(cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_LOCATION_NAME)));
         location.setLatitude(cursor.getDouble(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_LATITUDE)));
         location.setLongitude(cursor.getDouble(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_LONGITUDE)));
+        location.setAddress(cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_ADDRESS))); // Dodaj pobieranie adresu
         return location;
     }
     // Aktualizuj nazwę lokalizacji

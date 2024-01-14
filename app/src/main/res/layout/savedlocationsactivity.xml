@@ -23,5 +23,28 @@
         android:layout_alignParentEnd="true"
         android:padding="16dp"/>
 
+    <!-- Komórka listy z dwoma polami tekstowymi -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:id="@+id/listItemLayout">
+
+        <TextView
+            android:id="@+id/locationNameTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:padding="8dp"/>
+
+        <TextView
+            android:id="@+id/addressTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:padding="8dp"/>
+    </LinearLayout>
+
 </RelativeLayout>
+
 
