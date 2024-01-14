@@ -85,7 +85,15 @@ public class SavedLocationsActivity extends AppCompatActivity implements Adapter
     }
 
     private void setAsCurrentLocation(LocationModel location) {
-        // Tutaj ustaw lokalizację jako current
+        // Tutaj ustaw lokalizację jako bieżącą
+        GeoPointWrapper geoPointWrapper = new GeoPointWrapper(location.getGeoPoint().getLatitude(), location.getGeoPoint().getLongitude());
+
+        // Tworzymy intent z obiektem GeoPointWrapper i informacją o typie akcji
+        Intent intent = new Intent();
+        intent.putExtra("locationGeoPoint", geoPointWrapper);
+        intent.putExtra("actionType", "setCurrentLocation"); // Dodajemy informację o typie akcji
+        setResult(RESULT_OK, intent);
+        finish();
     }
 
     private void setAsDestination(LocationModel location) {
@@ -94,14 +102,11 @@ public class SavedLocationsActivity extends AppCompatActivity implements Adapter
         // Tworzymy obiekt GeoPointWrapper
         GeoPointWrapper geoPointWrapper = new GeoPointWrapper(location.getGeoPoint().getLatitude(), location.getGeoPoint().getLongitude());
 
-        // Tworzymy intent z obiektem GeoPointWrapper
+        // Tworzymy intent z obiektem GeoPointWrapper i informacją o typie akcji
         Intent intent = new Intent();
-        intent.putExtra("destinationGeoPoint", geoPointWrapper);
-
-        // Ustawiamy wynik aktywności, aby przekazać dane z powrotem do MainActivity
+        intent.putExtra("locationGeoPoint", geoPointWrapper);
+        intent.putExtra("actionType", "setDestination"); // Dodajemy informację o typie akcji
         setResult(RESULT_OK, intent);
-
-        // Zamykamy aktualną aktywność
         finish();
     }
 

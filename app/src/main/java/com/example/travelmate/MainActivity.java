@@ -16,6 +16,7 @@ import android.widget.LinearLayout;
 import org.osmdroid.api.IMapController;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.core.content.ContextCompat;
 import org.osmdroid.views.MapView;
@@ -87,6 +88,7 @@ public class MainActivity extends AppCompatActivity {
     private GeoPoint destinationPoint;
     String MY_USER_AGENT = "TravelMate";
     private static final int SAVED_LOCATIONS_REQUEST_CODE = 123;
+    private static final int CURRENT_LOCATION_REQUEST_CODE = 456;
 
 
 
@@ -395,18 +397,24 @@ public class MainActivity extends AppCompatActivity {
 
     }
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == SAVED_LOCATIONS_REQUEST_CODE && resultCode == RESULT_OK) {
-            // Pobieramy przekazane dane z Intent
-            GeoPointWrapper geoPointWrapper = data.getParcelableExtra("destinationGeoPoint");
+        if (requestCode == SAVED_LOCATIONS_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
+            GeoPointWrapper geoPointWrapper = data.getParcelableExtra("locationGeoPoint");
+            String actionType = data.getStringExtra("actionType");
 
-            // Tworzymy GeoPoint na podstawie danych z GeoPointWrapper
-            GeoPoint destinationGeoPoint = new GeoPoint(geoPointWrapper.getLatitude(), geoPointWrapper.getLongitude());
+            if (geoPointWrapper != null) {
+                GeoPoint location = new GeoPoint(geoPointWrapper.getLatitude(), geoPointWrapper.getLongitude());
 
-            // Wywołujemy setDestination z przekazaną lokalizacją
-            setDestination(destinationGeoPoint);
+                if ("setDestination".equals(actionType)) {
+                    // Wywołaj setDestination, ponieważ akcja to ustawianie celu
+                    setDestination(location);
+                } else if ("setCurrentLocation".equals(actionType)) {
+                    // Wywołaj setCurrentLocation, ponieważ akcja to ustawianie bieżącej lokalizacji
+                    setCurrentLocation(location);
+                }
+            }
         }
     }
     public void setCurrentLocation(GeoPoint currentLocation) {
