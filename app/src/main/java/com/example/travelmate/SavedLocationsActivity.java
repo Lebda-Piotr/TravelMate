@@ -1,6 +1,7 @@
 package com.example.travelmate;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
@@ -84,12 +85,26 @@ public class SavedLocationsActivity extends AppCompatActivity implements Adapter
     }
 
     private void setAsCurrentLocation(LocationModel location) {
-        // Tutaj ustaw aktualną lokalizację na mapie
+        // Tutaj ustaw lokalizację jako current
     }
 
     private void setAsDestination(LocationModel location) {
         // Tutaj ustaw lokalizację jako cel docelowy na mapie
+
+        // Tworzymy obiekt GeoPointWrapper
+        GeoPointWrapper geoPointWrapper = new GeoPointWrapper(location.getGeoPoint().getLatitude(), location.getGeoPoint().getLongitude());
+
+        // Tworzymy intent z obiektem GeoPointWrapper
+        Intent intent = new Intent();
+        intent.putExtra("destinationGeoPoint", geoPointWrapper);
+
+        // Ustawiamy wynik aktywności, aby przekazać dane z powrotem do MainActivity
+        setResult(RESULT_OK, intent);
+
+        // Zamykamy aktualną aktywność
+        finish();
     }
+
 
     private void deleteLocation(final LocationModel location) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -99,7 +114,7 @@ public class SavedLocationsActivity extends AppCompatActivity implements Adapter
         builder.setPositiveButton("Tak", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                LocationDataSource dataSource = new LocationDataSource(SavedLocationsActivity.this);
+                LocationDataSource dataSource = new LocationDataSource(getApplicationContext());
                 dataSource.open();
                 dataSource.deleteLocation(location.getId());
                 dataSource.close();

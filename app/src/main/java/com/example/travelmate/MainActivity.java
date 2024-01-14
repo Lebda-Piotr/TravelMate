@@ -86,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean setDestinationMode = false;
     private GeoPoint destinationPoint;
     String MY_USER_AGENT = "TravelMate";
+    private static final int SAVED_LOCATIONS_REQUEST_CODE = 123;
 
 
 
@@ -244,7 +245,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             private void addLocationToDatabase(String locationName, double latitude, double longitude, boolean isManual, String address) {
-                LocationDataSource dataSource = new LocationDataSource(MainActivity.this);
+                LocationDataSource dataSource = new LocationDataSource(getApplicationContext());
                 dataSource.open();
                 long result = dataSource.addLocation(locationName, latitude, longitude, address, isManual);
                 dataSource.close();
@@ -298,7 +299,7 @@ public class MainActivity extends AppCompatActivity {
 
             // Dodaj metodę do pobierania historii tras z bazy danych
             private List<LocationModel> getHistoryFromDatabase() {
-                LocationDataSource dataSource = new LocationDataSource(MainActivity.this);
+                LocationDataSource dataSource = new LocationDataSource(getApplicationContext());
                 dataSource.open();
                 List<LocationModel> history = dataSource.getAllLocations();
                 dataSource.close();
@@ -307,7 +308,7 @@ public class MainActivity extends AppCompatActivity {
 
             private void openSavedLocationsActivity() {
                 Intent intent = new Intent(MainActivity.this, SavedLocationsActivity.class);
-                startActivity(intent);
+                startActivityForResult(intent, SAVED_LOCATIONS_REQUEST_CODE);
             }
         });
 
@@ -393,6 +394,40 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == SAVED_LOCATIONS_REQUEST_CODE && resultCode == RESULT_OK) {
+            // Pobieramy przekazane dane z Intent
+            GeoPointWrapper geoPointWrapper = data.getParcelableExtra("destinationGeoPoint");
+
+            // Tworzymy GeoPoint na podstawie danych z GeoPointWrapper
+            GeoPoint destinationGeoPoint = new GeoPoint(geoPointWrapper.getLatitude(), geoPointWrapper.getLongitude());
+
+            // Wywołujemy setDestination z przekazaną lokalizacją
+            setDestination(destinationGeoPoint);
+        }
+    }
+    public void setCurrentLocation(GeoPoint currentLocation) {
+        if (myLocationOverlay != null) {
+            // Usuń poprzednią lokalizację
+            mapView.getOverlays().removeIf(overlay -> overlay instanceof Marker && ((Marker) overlay).getTitle() != null && ((Marker) overlay).getTitle().equals("Aktualna lokalizacja"));
+
+            // Dodaj nowy marker w miejscu aktualnej lokalizacji
+            Marker currentLocationMarker = new Marker(mapView);
+            currentLocationMarker.setPosition(currentLocation);
+            currentLocationMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+            currentLocationMarker.setTitle("Aktualna lokalizacja");
+            mapView.getOverlays().add(currentLocationMarker);
+
+            // Przybliż mapę do nowego markera
+            mapController.animateTo(currentLocation);
+
+            // Odśwież widok mapy
+            mapView.invalidate();
+        }
+    }
 
     private void enableSetDestinationMode() {
         setDestinationMode = !setDestinationMode;
@@ -403,7 +438,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void setDestination(GeoPoint destination) {
+    // Metoda do ustawiania celu docelowego
+    protected void setDestination(GeoPoint destination) {
         if (myLocationOverlay != null && myLocationOverlay.getMyLocation() != null) {
             GeoPoint userLocation = myLocationOverlay.getMyLocation();
 
@@ -445,18 +481,18 @@ public class MainActivity extends AppCompatActivity {
             }.execute();
         }
         // Dodaj nową lokalizację do bazy danych
-        addLocationToDatabase("Cel podróży", destination.getLatitude(), destination.getLongitude());
+        //addLocationToDatabase("Cel podróży", destination.getLatitude(), destination.getLongitude());
     }
     private void addLocationToDatabase(String locationName, double latitude, double longitude) {
-        LocationDataSource dataSource = new LocationDataSource(this);
+        LocationDataSource dataSource = new LocationDataSource(getApplicationContext());
         dataSource.open();
         long result = dataSource.addLocation(locationName, latitude, longitude, "" ,false);
         dataSource.close();
 
         if (result != -1) {
-            Toast.makeText(this, "Dodano lokalizację do bazy danych", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "Dodano lokalizację do bazy danych", Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(this, "Błąd podczas dodawania lokalizacji do bazy danych", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "Błąd podczas dodawania lokalizacji do bazy danych", Toast.LENGTH_SHORT).show();
         }
     }
 
