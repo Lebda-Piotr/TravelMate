@@ -22,7 +22,8 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_centerHorizontal="true"
-        android:layout_alignParentTop="true">
+        android:layout_alignParentTop="true"
+        android:background="#FFFFFF">
 
         <!-- Przycisk "Menu" -->
         <ImageButton
@@ -39,18 +40,20 @@
             android:text="Lokalizuj mnie" />
 
         <!-- Przycisk "Kompas" -->
+
+        <!-- Przycisk "Ustaw miejsce docelowe" -->
+
         <ImageButton
             android:id="@+id/compassButton"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:src="@drawable/compass_icon" />
 
-        <!-- Przycisk "Ustaw miejsce docelowe" -->
         <Button
             android:id="@+id/setDestinationButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Ustaw miejsce docelowe" />
+            android:text="Ustaw cel" />
     </LinearLayout>
 
     <!-- Dodany element związany z kompasem -->
