@@ -8,9 +8,6 @@
             android:id="@+id/menu_settings"
             android:title="Ustawienia" />
         <item
-            android:id="@+id/menu_rate"
-            android:title="Oceń nas" />
-        <item
             android:id="@+id/menu_history"
             android:title="Historia" />
         <item
