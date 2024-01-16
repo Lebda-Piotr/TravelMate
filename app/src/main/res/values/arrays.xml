@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="transport_types">
+        <item>Na piechotę</item>
+        <item>Samochodem</item>
+        <item>Rowerem</item>
+    </string-array>
+
+    <string-array name="transport_values">
+        <item>walking</item>
+        <item>car</item>
+        <item>bicycle</item>
+    </string-array>
+</resources>

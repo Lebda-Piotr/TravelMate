@@ -144,10 +144,8 @@ public class MainActivity extends AppCompatActivity {
                 if (itemId == R.id.menu_saved_locations) {
                     openSavedLocationsActivity();
                     return true;
-                    // Obsługa trybu nocnego
                 } else if (itemId == R.id.menu_settings) {
                     // Obsługa ustawień
-                    // Obsługa oceniania aplikacji
                 } else if (itemId == R.id.menu_history) {
                     // Obsługa przycisku "Historia"
                     showHistoryDialog();
