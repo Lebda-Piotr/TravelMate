@@ -390,7 +390,18 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
+        initMapView(); // Inicjalizacja mapy po uruchomieniu aplikacji
+    }
+    private void initMapView() {
+        // Centrowanie na aktualnej lokalizacji
+        if (myLocationOverlay != null && myLocationOverlay.getMyLocation() != null) {
+            double latitude = myLocationOverlay.getMyLocation().getLatitude();
+            double longitude = myLocationOverlay.getMyLocation().getLongitude();
+            GeoPoint userLocation = new GeoPoint(latitude, longitude);
+            mapController.setCenter(userLocation);
+        } else {
+            Toast.makeText(MainActivity.this, "Brak dostępu do lokalizacji.", Toast.LENGTH_SHORT).show();
+        }
     }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
